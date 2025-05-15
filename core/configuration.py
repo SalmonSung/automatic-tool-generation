@@ -22,6 +22,15 @@ class WriterProvider(Enum):
 class FilterProvider(Enum):
     OPENAI = "openai"
 
+class FileType(Enum):
+    CSV = "csv"
+    JSON = "json"
+
+
+class Index4File(Enum):
+    TRUE = "true"
+    FALSE = "false"
+
 
 @dataclass(kw_only=True)
 class Configuration:
@@ -29,12 +38,13 @@ class Configuration:
     # planner_model: str = "claude-3-7-sonnet-latest"
     planner_provider: PlannerProvider = PlannerProvider.OPENAI
     planner_model: str = "o3-mini"
-    # writer_provider: WriterProvider = WriterProvider.XAI
-    # writer_model: str = "grok-2-latest"
     writer_provider: WriterProvider = WriterProvider.ANTHROPIC
     writer_model: str = "claude-3-5-sonnet-latest"
     filter_provider: FilterProvider = FilterProvider.OPENAI
     filter_model: str = "gpt-4o-mini"
+    file_type: FileType = FileType.CSV
+    index4file: Index4File = Index4File.TRUE
+    Breadth: int = 5
 
     @classmethod
     def from_runnable_config(
