@@ -15,7 +15,7 @@ This approach enables more flexible, scalable, and intelligent agents that can a
 > **CLI tools are still under active development**, and functionality is currently limited.
 > For full experience, consider using **LangGraph Studio** instead.
 >
-> 👉 Check how to get started with [LangGraph Studio](example.link) for this project
+> 👉 Check how to get started with [LangGraph Studio](doc/how_to/use_langgraph_dev.md) for this project
 
 # Quick Start
 
@@ -37,3 +37,7 @@ This approach enables more flexible, scalable, and intelligent agents that can a
    ```
    >This step does not require creating account.
    >It run a local server and open a web browser to control the agent
+
+# Table of Content 
+- Usage Guideline:
+   - [LangGraph Dev(recommand)](docs/how_to/use_langgraph_dev.md)
