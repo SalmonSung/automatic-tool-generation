@@ -1,3 +1,5 @@
+![image](https://github.com/user-attachments/assets/d1cfac6a-8c8e-4426-ae79-bfbdbd4c8310)
+
 # Automatic Tool Generation
 
 **Automatic Tool Generation** is a subproject of [*Create Data Scientist Agent*](docs/hyperproject.md)
