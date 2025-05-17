@@ -1,5 +1,7 @@
 import pandas as pd
 from typing import Literal
+from pydantic import BaseModel
+
 
 
 def get_column_info(csv_path: str, index4file) -> str:
@@ -16,3 +18,15 @@ def get_column_info(csv_path: str, index4file) -> str:
         df = pd.read_csv(csv_path)
         columns = list(df.columns)
         return f"Columns: {', '.join(columns)}"
+
+
+def pydantic2dict(item: BaseModel | list) -> dict:
+    if isinstance(item, list):
+        item = item[0]
+
+    #Dict form
+    item = item.model_dump()
+
+    #Keys list
+    key = list(item.keys())
+    return item

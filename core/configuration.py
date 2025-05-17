@@ -39,9 +39,10 @@ class Configuration:
     planner_provider: PlannerProvider = PlannerProvider.OPENAI
     planner_model: str = "o3-mini"
     writer_provider: WriterProvider = WriterProvider.ANTHROPIC
-    writer_model: str = "claude-3-5-sonnet-latest"
+    # writer_model: str = "claude-3-7-sonnet-latest"
+    writer_model: str = "gpt-4.1-nano"
     filter_provider: FilterProvider = FilterProvider.OPENAI
-    filter_model: str = "gpt-4o-mini"
+    filter_model: str = "gpt-4.1-mini"
     file_type: FileType = FileType.CSV
     index4file: Index4File = Index4File.TRUE
     Breadth: int = 5

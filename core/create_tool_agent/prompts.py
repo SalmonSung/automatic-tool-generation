@@ -5,12 +5,5 @@ Your primary objective is to identify meaningful patterns in the data. Below are
 """
 
 
-prompt_generate_code4idea = """"
-You are a skilled programmers. Your task is to write the Python code to achieve the idea use to analyze the given file.
 
-Following is the columns name, and index, if applicable.
 
-<columns_info>
-{columns_info}
-<\columns_info>
-"""
