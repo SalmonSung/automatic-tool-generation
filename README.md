@@ -16,3 +16,24 @@ This approach enables more flexible, scalable, and intelligent agents that can a
 > For full experience, consider using **LangGraph Studio** instead.
 >
 > 👉 Check how to get started with [LangGraph Studio](example.link) for this project
+
+# Quick Start
+
+1. **Set up your environment**  
+   ```bash
+   cp .env.example .env
+   ```
+   Update the `.env` file with your own API keys and configuration as needed.
+
+2. **Install dependencies**  
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. **(Optional) Use LangGraph Studio**  
+   If you want to use LangGraph Studio for a better development experience:  
+   ```bash
+   pip install 'langgraph-cli[inmem]'
+   ```
+   >This step does not require creating account.
+   >It run a local server and open a web browser to control the agent
