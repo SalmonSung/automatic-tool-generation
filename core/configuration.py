@@ -45,7 +45,7 @@ class Configuration:
     filter_model: str = "gpt-4.1-mini"
     file_type: FileType = FileType.CSV
     index4file: Index4File = Index4File.TRUE
-    Breadth: int = 5
+    breadth: int = 5
 
     @classmethod
     def from_runnable_config(

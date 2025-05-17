@@ -1,4 +1,4 @@
-from typing import List, TypedDict, Literal, Annotated
+from typing import List, TypedDict, Literal, Annotated, Optional
 from pydantic import BaseModel, Field
 import operator
 
@@ -11,5 +11,4 @@ class SectionOutput(BaseModel):
 class SectionState(TypedDict):
     orig_file_path: str
     columns_info: str
-
     code_approval_items: Annotated[list, operator.add]
