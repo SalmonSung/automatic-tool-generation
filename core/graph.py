@@ -1,12 +1,18 @@
+import os
+from datetime import datetime
 from langgraph.graph import StateGraph, START, END
 from langchain_core.runnables import RunnableConfig
+from langchain.chat_models import init_chat_model
+from langchain_core.messages import HumanMessage, SystemMessage
 from langgraph.types import Command
 from langgraph.constants import Send
 
 from core.utils import *
 from core.state import *
+from core.prompts import *
 from core.configuration import Configuration
 from core.create_tool_agent.graph import create_tool_agent_builder
+from config import APP_PATH_RESULT
 
 
 def load_file(state: SectionState, config: RunnableConfig):
@@ -27,6 +33,7 @@ def router(state: SectionState, config: RunnableConfig) -> Command[Literal["crea
         for c in columns_infos
     ])
 
+
 def format_response(state: SectionState, config: RunnableConfig):
     code_approval_items_dict = []
     for item in state["code_approval_items"]:
@@ -36,8 +43,28 @@ def format_response(state: SectionState, config: RunnableConfig):
     state["code_approval_items"].extend(code_approval_items_dict)
     return state
 
+
 def response2file(state: SectionState, config: RunnableConfig):
-    return {}
+    configurable = Configuration.from_runnable_config(config)
+    writer_model = configurable.writer_model
+    system_prompt = prompt_response2file
+    if writer_model == "claude-3-7-sonnet-latest":
+        writer_llm = init_chat_model(model=writer_model,
+                                     max_tokens=20_000,
+                                     thinking={"type": "disabled", "budget_tokens": 16_000}
+                                     )
+    else:
+        writer_llm = init_chat_model(model=writer_model)
+    structured_llm = writer_llm.with_structured_output(R2FFormat)
+    output = structured_llm.invoke(
+        [SystemMessage(content=system_prompt), HumanMessage(content="\n".join(item["code"] for item in state["code_approval_items"]))])
+
+    file_name = f"tool_{datetime.now().strftime('%Y%m%d_%H%M%S')}.py"
+    file_path = os.path.join(APP_PATH_RESULT, file_name)
+    with open(file_path, "w") as f:
+        f.write(output.code)
+    return {"clean_code_sheet": output.code}
+
 
 builder = StateGraph(SectionState, input=SectionInput, output=SectionOutput, config_schema=Configuration)
 builder.add_node("load_file", load_file)

@@ -1,3 +1,5 @@
+import os
+from pathlib import Path
 import pandas as pd
 from typing import Literal
 from pydantic import BaseModel
@@ -30,3 +32,12 @@ def pydantic2dict(item: BaseModel | list) -> dict:
     #Keys list
     key = list(item.keys())
     return item
+
+
+
+def get_latest_file(directory: str, ext=".py"):
+    files = list(Path(directory).glob(f"*{ext}"))
+    if not files:
+        return None
+    latest_file = max(files, key=os.path.getctime)
+    return latest_file

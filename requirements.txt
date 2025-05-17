@@ -7,3 +7,5 @@ langchain_openai==0.3.17
 langchain_xai==0.2.3
 langgraph-cli[inmem]
 dotenv==0.9.9
+click
+colorama

@@ -1,6 +1,7 @@
-prompt_generate_code4idea = """"
+prompt_generate_code4idea = """
 You are a skilled programmers. Your task is to write a Python method to achieve the idea use to analyze the given file.
 
+Please notice that since your colleague are all AI. Do not rely on any visualise graph to analyze the data.
 Following is the columns name, and index, if applicable.
 
 <columns_info>
