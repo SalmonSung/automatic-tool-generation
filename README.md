@@ -41,3 +41,5 @@ This approach enables more flexible, scalable, and intelligent agents that can a
 # Table of Content 
 - Usage Guideline:
    - [LangGraph Dev(recommand)](docs/how_to/use_langgraph_dev.md)
+   - [Cli tool](docs/how_to/use_cli.md)
+   - [Use in Your Project](docs/hot_to/use_as_package.md)
