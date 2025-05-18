@@ -41,6 +41,8 @@ There are some [examples](example/gen_tool_01.py) of generated tools avaliable.
    >This step does not require creating account.
    >It run a local server and open a web browser to control the agent
 
+View the [documntation](https://salmonsung.github.io/automatic-tool-generation/) for more details on features and configuration options best suited to your project.
+
 # Table of Content 
 - Usage Guideline:
    - [LangGraph Dev(recommand)](docs/how_to/use_langgraph_dev.md)
