@@ -17,7 +17,7 @@ This approach enables more flexible, scalable, and intelligent agents that can a
 > **CLI tools are still under active development**, and functionality is currently limited.
 > For full experience, consider using **LangGraph Studio** instead.
 >
-> 👉 Check how to get started with [LangGraph Studio](doc/how_to/use_langgraph_dev.md) for this project
+> 👉 Check how to get started with [LangGraph Studio](docs/how_to/use_langgraph_dev.md) for this project
 
 # Quick Start
 
