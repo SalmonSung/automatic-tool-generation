@@ -12,6 +12,7 @@ The main goal of this project is to **automatically and independently generate t
 4. **Validate** them against sample data
 
 This approach enables more flexible, scalable, and intelligent agents that can adapt to diverse data analysis scenarios without requiring human experts in tool preparation.
+There are some [examples](example/gen_tool_01.py) of generated tools avaliable.
 
 > [!WARNING]
 > **CLI tools are still under active development**, and functionality is currently limited.
