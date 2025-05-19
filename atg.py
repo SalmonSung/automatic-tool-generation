@@ -11,7 +11,8 @@ class AgentBuilder:
                  writer_model="gpt-4.1-nano",
                  file_type="CSV",
                  index4file="true",
-                 breadth=2):
+                 breadth=2,
+                 max_tokens=32768 ,):
         # Configurable parameters
         self.planner_provider = planner_provider
         self.planner_model = planner_model
@@ -20,6 +21,7 @@ class AgentBuilder:
         self.file_type = file_type
         self.index4file = index4file
         self.breadth = breadth
+        self.max_tokens = max_tokens
 
         # Internal state
         self.memory = MemorySaver()
@@ -35,7 +37,8 @@ class AgentBuilder:
                 "writer_model": self.writer_model,
                 "file_type": self.file_type,
                 "index4file": self.index4file,
-                "Breadth": self.breadth,
+                "breadth": self.breadth,
+                "max_tokens": self.max_tokens,
             }
         }
 

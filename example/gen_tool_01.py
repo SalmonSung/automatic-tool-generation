@@ -1,109 +1,103 @@
+from langchain_core.tools import tool, Tool
 import pandas as pd
+import statsmodels.api as sm
+from sklearn.ensemble import IsolationForest
 import numpy as np
-from sklearn.preprocessing import StandardScaler
-from sklearn.cluster import KMeans
-from statsmodels.tsa.stattools import acf
-from statsmodels.tsa.seasonal import STL
-from langchain_core.tools import tool
+from statsmodels.tsa.seasonal import seasonal_decompose
 
-def load_csv_with_datetime(file_path, parse_dates=['SNAPSHOT_TIME'], index_col='SNAPSHOT_TIME'):
-    """Load CSV file, parse date columns, and set index."""
-    return pd.read_csv(file_path, parse_dates=parse_dates, index_col=index_col)
-
-@tool
-def analyze_data(file_path):
-    """Load data from CSV file and compute summary statistics (mean, median, std) for numeric columns."""
-    df = load_csv_with_datetime(file_path)
-    numerical_cols = df.select_dtypes(include=[np.number]).columns.tolist()
-    summary_stats = df[numerical_cols].agg(['mean', 'median', 'std'])
-    return summary_stats
+def load_and_prepare_data(file_path):
+    """Load CSV data, parse dates, and set index."""
+    df = pd.read_csv(file_path)
+    df['SNAPSHOT_TIME'] = pd.to_datetime(df['SNAPSHOT_TIME'])
+    df.set_index('SNAPSHOT_TIME', inplace=True)
+    return df
 
 @tool
-def detect_anomalies_zscore(file_path, window=10, threshold=3):
-    """Detect anomalies in selected columns ('PING_MS', 'CPU', 'CONNS') using rolling window Z-score method."""
-    df = load_csv_with_datetime(file_path)
-    anomalies = {}
-    for column in ['PING_MS', 'CPU', 'CONNS']:
-        if column in df.columns:
-            rolling_mean = df[column].rolling(window=window).mean()
-            rolling_std = df[column].rolling(window=window).std().replace(0, np.nan)
-            z_scores = (df[column] - rolling_mean) / rolling_std
-            anomalies[column] = z_scores.abs() > threshold
-    return anomalies
-
-@tool
-def analyze_time_series(file_path):
-    """Perform autocorrelation analysis and seasonal decomposition on system metrics."""
-    df = load_csv_with_datetime(file_path)
-    columns = ['PING_MS', 'CPU', 'USED_GB', 'CONNS', 'TRANS', 'WAIT_THR', 'BUSY_SQL', 'PEND_SESS', 'D_WR_MBPS']
-    autocorr_results = {}
-    seasonal_results = {}
-    for col in columns:
-        series = df[col].dropna()
-        autocorr_results[col] = acf(series, nlags=30, fft=False)
-        try:
-            stl = STL(series, period=7, robust=True).fit()
-            seasonal_results[col] = {'trend': stl.trend,
-                                     'seasonal': stl.seasonal,
-                                     'resid': stl.resid}
-        except:
-            seasonal_results[col] = None
-    return {'autocorrelations': autocorr_results, 'seasonal_decomposition': seasonal_results}
-
-@tool
-def analyze_peak_periods(file_path, freq='H'):
-    """Resample data to detect peak periods for activity metrics."""
-    df = load_csv_with_datetime(file_path)
-    resampled = df.resample(freq).agg({
-        'CONNS': ['max', 'mean'],
-        'TRANS': ['max', 'mean'],
-        'BUSY_SQL': ['max', 'mean']
-    })
-    resampled.columns = ['_'.join(col).strip() for col in resampled.columns]
-    return resampled
-
-@tool
-def analyze_correlations(file_path):
-    """Compute correlation matrix for system metrics."""
-    df = load_csv_with_datetime(file_path)
-    selected_cols = ['CPU', 'PING_MS', 'USED_GB', 'SWAP_MB', 'CONNS', 'TRANS', 'WAIT_THR', 'BUSY_SQL', 'PEND_SESS', 'D_WR_MBPS', 'DOWN_EVENT']
-    corr_matrix = df[selected_cols].corr()
-    return corr_matrix
-
-@tool
-def cluster_system_snapshots(file_path, n_clusters=3):
-    """Cluster snapshots based on performance metrics to identify similar system states."""
-    df = load_csv_with_datetime(file_path)
-    features = ['PING_MS', 'CPU', 'USED_GB', 'SWAP_MB', 'CONNS', 'TRANS', 'WAIT_THR', 'BUSY_SQL', 'PEND_SESS', 'D_WR_MBPS', 'DOWN_EVENT']
-    data = df[features].fillna(0)
-    scaler = StandardScaler()
-    scaled_data = scaler.fit_transform(data)
-    kmeans = KMeans(n_clusters=n_clusters, random_state=42)
-    df['Cluster'] = kmeans.fit_predict(scaled_data)
-    return df[['HOST', 'PORT', 'Cluster']], kmeans, scaler
-
-@tool
-def detect_time_series_anomalies(file_path, columns=['PING_MS', 'CPU', 'CONNS'], window=20, threshold=3):
-    """Detect anomalies in specified columns using rolling window Z-score method."""
-    df = load_csv_with_datetime(file_path)
-    anomalies = {}
+def analyze_time_series_full(file_path: str) -> dict:
+    """Load data and perform seasonal decomposition on PING_MS, CPU, and USED_GB columns."""
+    df = load_and_prepare_data(file_path)
+    columns = ['PING_MS', 'CPU', 'USED_GB']
+    decompositions = {}
     for col in columns:
         if col in df.columns:
-            rolling_mean = df[col].rolling(window=window).mean()
-            rolling_std = df[col].rolling(window=window).std().replace(0, np.nan)
-            z_scores = (df[col] - rolling_mean) / rolling_std
-            anomalies[col] = z_scores.abs() > threshold
-    return anomalies
+            try:
+                # Interpolate missing values
+                ts = df[col].interpolate()
+                # Decompose with period=12 (adjust based on data frequency)
+                result = sm.tsa.seasonal_decompose(ts, model='additive', period=12)
+                decompositions[col] = result
+            except Exception as e:
+                decompositions[col] = str(e)
+        else:
+            decompositions[col] = 'Column not found'
+    return decompositions
 
 @tool
-def analyze_correlation_pairs(file_path, column_pairs):
-    """Compute correlation coefficients for specific pairs of columns."""
-    df = load_csv_with_datetime(file_path)
-    correlations = {}
-    for col1, col2 in column_pairs:
-        if col1 in df.columns and col2 in df.columns:
-            corr_value = df[[col1, col2]].corr().iloc[0,1]
-            correlations[f'{col1} vs {col2}'] = corr_value
-        else:
-            correlations[f'{col1} vs {col2}'] = 'Column not found'
-    return correlations
+def analyze_correlations_full(file_path: str) -> dict:
+    """Calculate and return the top 3 correlated metrics with CONNS and TRANS."""
+    df = load_and_prepare_data(file_path)
+    relevant_cols = ['CONNS', 'TRANS', 'PING_MS', 'CPU', 'USED_GB', 'SWAP_MB', 'WAIT_THR', 'BUSY_SQL', 'PEND_SESS', 'D_WR_MBPS']
+    df_numeric = df[relevant_cols].dropna()
+    corr_matrix = df_numeric.corr()
+    results = {}
+    for target in ['CONNS', 'TRANS']:
+        correlations = corr_matrix[target].drop(labels=[target])
+        top3 = correlations.abs().sort_values(ascending=False).head(3)
+        results[f'top_correlated_with_{target}'] = top3.to_dict()
+    return results
+
+@tool
+def detect_anomalies_full(file_path: str, metrics: list=['PING_MS', 'CPU', 'BUSY_SQL'], window_size: int=30, threshold: float=3):
+    """Detect anomalies using Z-score method over rolling window."""
+    df = pd.read_csv(file_path, index_col='SNAPSHOT_TIME', parse_dates=True)
+    df_anomaly = df.copy()
+    for metric in metrics:
+        if metric not in df.columns:
+            continue
+        # Rolling mean and std
+        rolling_mean = df[metric].rolling(window=window_size, min_periods=1).mean()
+        rolling_std = df[metric].rolling(window=window_size, min_periods=1).std()
+        # Avoid division by zero
+        safe_std = rolling_std.replace(0, 1e-9)
+        z_score = (df[metric] - rolling_mean) / safe_std
+        # Flag anomalies
+        df_anomaly[f'{metric}_anomaly'] = abs(z_score) > threshold
+    return df_anomaly
+
+@tool
+def analyze_temporal_patterns_full(file_path: str) -> dict:
+    """Analyze multiple temporal patterns and detect anomalies for given metrics."""
+    df = load_and_prepare_data(file_path)
+    metrics = ['CPU', 'USED_GB', 'SWAP_MB', 'CONNS', 'TRANS', 'WAIT_THR', 'BUSY_SQL', 'PEND_SESS', 'D_WR_MBPS', 'DOWN_EVENT']
+    results = {}
+    for metric in metrics:
+        if metric not in df.columns:
+            continue
+        series = df[metric].dropna()
+        # Moving average for trend
+        window_size = max(1, len(series)//10)
+        moving_avg = series.rolling(window=window_size, min_periods=1).mean()
+        # Seasonal decomposition
+        try:
+            decomposition = seasonal_decompose(series, model='additive', period=12)
+            seasonal = decomposition.seasonal
+            trend = decomposition.trend
+            residual = decomposition.resid
+        except Exception:
+            seasonal = trend = residual = pd.Series([np.nan] * len(series), index=series.index)
+        # Anomaly detection with Isolation Forest
+        reshaped = series.values.reshape(-1,1)
+        clf = IsolationForest(contamination='auto', random_state=42)
+        clf.fit(reshaped)
+        preds = clf.predict(reshaped)
+        anomalies_idx = series.index[preds == -1]
+        results[metric] = {
+            'moving_avg': moving_avg,
+            'trend': trend,
+            'seasonal': seasonal,
+            'residual': residual,
+            'anomalies': anomalies_idx
+        }
+    return results
+
+tools = [analyze_time_series_full, analyze_correlations_full, detect_anomalies_full, analyze_temporal_patterns_full]

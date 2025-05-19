@@ -3,7 +3,8 @@ You are a senior developer tasked with identifying and refactoring duplicate or 
 
 Always ensure files are loaded using their full file paths.
 Please provide comprehensive docstring for each method.
-Please add decorate @tool
+Please add decorate @tool 
+Please add every tool into tools list like the following example.
 
 Format your output like the following example:
 ```python

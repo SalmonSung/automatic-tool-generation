@@ -47,6 +47,7 @@ def format_response(state: SectionState, config: RunnableConfig):
 def response2file(state: SectionState, config: RunnableConfig):
     configurable = Configuration.from_runnable_config(config)
     writer_model = configurable.writer_model
+    max_tokens = configurable.max_tokens
     system_prompt = prompt_response2file
     if writer_model == "claude-3-7-sonnet-latest":
         writer_llm = init_chat_model(model=writer_model,
@@ -54,7 +55,7 @@ def response2file(state: SectionState, config: RunnableConfig):
                                      thinking={"type": "disabled", "budget_tokens": 16_000}
                                      )
     else:
-        writer_llm = init_chat_model(model=writer_model)
+        writer_llm = init_chat_model(model=writer_model, max_tokens=max_tokens,)
     structured_llm = writer_llm.with_structured_output(R2FFormat)
     output = structured_llm.invoke(
         [SystemMessage(content=system_prompt), HumanMessage(content="\n".join(item["code"] for item in state["code_approval_items"]))])

@@ -46,6 +46,7 @@ class Configuration:
     file_type: FileType = FileType.CSV
     index4file: Index4File = Index4File.TRUE
     breadth: int = 5
+    max_tokens: int = 32768
 
     @classmethod
     def from_runnable_config(
