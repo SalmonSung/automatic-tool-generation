@@ -63,7 +63,7 @@ def response2file(state: SectionState, config: RunnableConfig):
     file_path = os.path.join(APP_PATH_RESULT, file_name)
     with open(file_path, "w") as f:
         f.write(output.code)
-    return {"clean_code_sheet": output.code}
+    return {"clean_code_sheet": output.code, "tool_save_path": file_path}
 
 
 builder = StateGraph(SectionState, input=SectionInput, output=SectionOutput, config_schema=Configuration)

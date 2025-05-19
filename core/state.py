@@ -13,6 +13,7 @@ class SectionInput(BaseModel):
 
 
 class SectionOutput(BaseModel):
+    tool_save_path: str = Field(description="Path to where the generated code will be saved")
     clean_code_sheet: str = Field(description="The Python code after your process.")
 
 
@@ -22,4 +23,5 @@ class SectionState(TypedDict):
 
     code_approval_items: Annotated[list, operator.add]
 
+    tool_save_path: str
     clean_code_sheet: str

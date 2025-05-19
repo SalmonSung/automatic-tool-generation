@@ -3,6 +3,9 @@ import click
 import config
 from core.utils import get_latest_file
 from atg import AgentBuilder  # Assuming this is where AgentBuilder lives
+from dotenv import load_dotenv
+
+load_dotenv()
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
@@ -30,13 +33,14 @@ Example:
     help="How many methods should the agent create?"
 )
 def generate(path, breadth):
-    click.echo(f"📂 Input File: {path}")
-    click.echo(f"🔢 Breadth: {breadth}")
+    print("Generating tools for {} breadth={}".format(path, breadth))
+    # click.echo(f" Input File: {path}")
+    # click.echo(f" Breadth: {breadth}")
 
     import asyncio
     agent = AgentBuilder(breadth=breadth)
     results = asyncio.run(agent.run(path))
-    click.echo("✅ Generation complete!")
+    print(f'\n\nGenerated Tools saved in {results}\n\n')
 
 
 @click.command(help="""\b

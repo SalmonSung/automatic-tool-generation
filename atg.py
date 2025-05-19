@@ -47,11 +47,12 @@ class AgentBuilder:
         results = []
 
         async for s in self.graph.astream(event, self.thread, stream_mode="updates"):
-            print("================================")
-            print(s)
+            # print("================================")
+            # print(s)
+            print("running...")
             results.append(s)
 
-        return results
+        return results[-1]['response2file']["tool_save_path"]
 
 if __name__ == "__main__":
     import asyncio
@@ -59,7 +60,7 @@ if __name__ == "__main__":
 
     load_dotenv()
 
-    file_path = r"C:\Users\kaiyi\Desktop\github\automatic-tool-generation\dataset\synthetic_server_metrics.csv"
+    file_path = ""
 
     agent = AgentBuilder()
     results = asyncio.run(agent.run(file_path))
