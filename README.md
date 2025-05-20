@@ -20,6 +20,10 @@ There are some [examples](example/gen_tool_01.py) of generated tools avaliable.
 >
 > 👉 Check how to get started with [LangGraph Studio](docs/how_to/use_langgraph_dev.md) for this project
 
+> [!NOTE]  
+> This project is designed to work seamlessly with [create_react_agent](https://python.langchain.com/api_reference/langchain/agents/langchain.agents.react.agent.create_react_agent.html) from LangGraph.
+> The generated tool functions are fully compatible with the `create_react_agent` framework. However, if you remove the `@tool` decorator, these functions can also be used in any other framework.
+ 
 # Quick Start
 
 1. **Set up your environment**  
